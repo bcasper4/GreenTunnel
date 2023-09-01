@@ -22,6 +22,8 @@
     "electron-winstaller": "^3.0.4"
   },
   "dependencies": {
+    "electron-prompt": "^1.7.0",
+    "electron-store": "^8.1.0",
     "electron-window-state": "^5.0.3",
     "green-tunnel": "latest",
     "jquery": ">=3.4.0"

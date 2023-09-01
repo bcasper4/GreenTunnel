@@ -1,14 +1,18 @@
-const { app, BrowserWindow, Menu, Tray, shell, ipcMain, nativeImage } = require('electron');
+const {app, BrowserWindow, Menu, Tray, shell, ipcMain, nativeImage} = require('electron');
 const windowStateKeeper = require('electron-window-state');
 const debug = /--debug/.test(process.argv[2]);
-const { Proxy } = require('green-tunnel');
+const {Proxy} = require('green-tunnel');
 const path = require('path');
 const os = require('os');
+const prompt = require('electron-prompt');
+const Store = require('electron-store');
+
+const store = new Store();
 
 // diable any dialog box!
 const electron = require('electron');
 const dialog = electron.dialog;
-dialog.showErrorBox = function(title, content) {
+dialog.showErrorBox = function (title, content) {
     console.log(`${title}\n${content}`);
 };
 
@@ -21,6 +25,11 @@ if (setupEvents.handleSquirrelEvent()) {
 
 let win, tray, proxy;
 let isOn = false;
+let globalProxy = store.get('globalProxy', true);
+let port = store.get('port', 8086);
+let openAtLogin = app.getLoginItemSettings().openAtLogin;
+
+console.log(app.getLoginItemSettings(), store.store);
 
 const menuItems = [
     {
@@ -29,8 +38,21 @@ const menuItems = [
         click: () => turnOff(),
     },
     {
-        label: 'Run At Login',
+        label: 'Change Port',
+        type: 'normal',
+        click: () => changePort(),
+    },
+    {
+        label: 'Port Only',
         type: 'checkbox',
+        checked: !globalProxy,
+        click: () => togglePortOnly(),
+    },
+    {
+        label: 'Run At Startup',
+        type: 'checkbox',
+        checked: openAtLogin,
+        click: () => runAtLogin(),
     },
     {
         type: 'separator',
@@ -52,6 +74,69 @@ const menuItems = [
     },
 ];
 
+async function runAtLogin() {
+    openAtLogin = !openAtLogin;
+
+    app.setLoginItemSettings({
+        openAtLogin,
+        openAsHidden: openAtLogin,
+        name: 'GreenTunnel'
+    })
+}
+
+async function changePort() {
+    prompt({
+        title: 'Which port?',
+        label: 'Port:',
+        value: port,
+        inputAttrs: {
+            type: 'number'
+        },
+        type: 'input'
+    }).then(async (value) => {
+        if (value === null) {
+            console.log('user cancelled');
+        } else {
+            port = value;
+
+            store.set('port', port);
+
+            await turnOff();
+            if (globalProxy) {
+                await turnOn();
+            } else {
+                await turnPortOnlyOn();
+            }
+        }
+    }).catch(console.error);
+}
+
+async function togglePortOnly() {
+    if (globalProxy) {
+        globalProxy = false;
+
+        await turnPortOnlyOn();
+    } else {
+        globalProxy = true;
+
+        await turnOff();
+        await turnOn();
+    }
+
+    store.set('globalProxy', globalProxy);
+}
+
+async function turnPortOnlyOn() {
+    isOn = true;
+    if (proxy) {
+        await proxy.stop();
+    }
+    console.log('turnPortOnlyOn', globalProxy);
+    proxy = new Proxy({port})
+    await proxy.start();
+    win.webContents.send('changeStatus', isOn, port);
+}
+
 async function turnOff() {
     isOn = false;
 
@@ -60,7 +145,7 @@ async function turnOff() {
         proxy = null
     }
 
-    win.webContents.send('changeStatus', isOn);
+    win.webContents.send('changeStatus', isOn, port, true);
 
     menuItems[0].label = 'Enable';
     menuItems[0].click = () => turnOn();
@@ -73,15 +158,19 @@ async function turnOff() {
 
 async function turnOn() {
     isOn = true;
+    globalProxy = true;
 
     if (proxy) {
         await turnOff()
     }
 
-    proxy = new Proxy({source: 'GUI'});
+    console.log('turn on proxy', port);
+    proxy = new Proxy({source: 'GUI', port});
     await proxy.start({setProxy: true});
 
-    win.webContents.send('changeStatus', isOn);
+    console.log('proxy turned on');
+
+    win.webContents.send('changeStatus', isOn, port, true);
 
     menuItems[0].label = 'Disable';
     menuItems[0].click = () => turnOff();
@@ -93,7 +182,7 @@ async function turnOn() {
 }
 
 function createWindow() {
-    const iconPath = path.join(__dirname, 'icons/icon.icns');
+    const iconPath = path.join(__dirname, 'icon.png');
     const appIcon = nativeImage.createFromPath(iconPath);
 
     const stateManager = windowStateKeeper();
@@ -123,17 +212,21 @@ function createWindow() {
 
     win.loadFile('./view/main-page/index.html');
 
-    win.on('ready-to-show', function() {
+    win.on('ready-to-show', async function () {
         win.show();
         win.focus();
-        turnOn();
+        if (globalProxy) {
+            await turnOn();
+        } else {
+            await turnPortOnlyOn();
+        }
     });
 
     win.on('closed', () => {
         win = null
     });
 
-    if(debug)
+    if (debug)
         win.webContents.openDevTools()
 }
 
@@ -160,7 +253,7 @@ app.on('ready', () => {
 });
 
 app.on('before-quit', async (e) => {
-    if(isOn) {
+    if (isOn) {
         e.preventDefault();
         await turnOff();
         app.quit();
@@ -168,14 +261,14 @@ app.on('before-quit', async (e) => {
 });
 
 ipcMain.on('close-button', (event, arg) => {
-    if(os.platform() === 'darwin')
+    if (os.platform() === 'darwin')
         app.hide();
     else
-        app.quit();
+        win.hide();
 });
 
 ipcMain.on('on-off-button', (event, arg) => {
-    if(isOn)
+    if (isOn)
         turnOff();
     else
         turnOn();

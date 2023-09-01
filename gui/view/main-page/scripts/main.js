@@ -10,13 +10,16 @@ $( document ).ready(function() {
         ipcRenderer.send('on-off-button')
     });
 
-    ipcRenderer.on('changeStatus', (event, isOn) => {
+    ipcRenderer.on('changeStatus', (event, isOn, port, isGlobal) => {
+        console.log('changeStatus', isOn, port, isGlobal);
         if(isOn) {
             $('.toggle').each(() => {
                 $(this).find('*').removeClass('red');
                 $(this).find('*').addClass('green');
             });
-            $('#status-off-on').html('is on');
+            let status = port ? ` at port ${port}` : '';
+            status += isGlobal ? ' and global proxy set' : '';
+            $('#status-off-on').html('is on' + status);
         } else {
             $('.toggle').each(() => {
                 $(this).find('*').removeClass('green');
