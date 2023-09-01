@@ -8,7 +8,6 @@ on:
 jobs:
   build-for-mac:
     runs-on: macOS-latest
-    needs: [publish-npm]
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
@@ -49,7 +48,6 @@ jobs:
 
   build-for-windows:
     runs-on: windows-latest
-    needs: [publish-npm]
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
@@ -86,7 +84,6 @@ jobs:
 
   build-for-linux:
     runs-on: ubuntu-latest
-    needs: [publish-npm]
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
