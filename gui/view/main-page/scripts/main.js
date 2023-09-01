@@ -11,7 +11,6 @@ $( document ).ready(function() {
     });
 
     ipcRenderer.on('changeStatus', (event, isOn, port, isGlobal) => {
-        console.log('changeStatus', isOn, port, isGlobal);
         if(isOn) {
             $('.toggle').each(() => {
                 $(this).find('*').removeClass('red');

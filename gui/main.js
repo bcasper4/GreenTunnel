@@ -68,6 +68,11 @@ const menuItems = [
         click: () => shell.openExternal('https://github.com/SadeghHayeri/GreenTunnel#donation'),
     },
     {
+        label: 'Show main window',
+        type: 'normal',
+        click: () => win.show(),
+    },
+    {
         role: 'quit',
         label: 'Quit',
         type: 'normal',
@@ -101,40 +106,17 @@ async function changePort() {
 
             store.set('port', port);
 
-            await turnOff();
-            if (globalProxy) {
-                await turnOn();
-            } else {
-                await turnPortOnlyOn();
-            }
+            await turnOn();
         }
     }).catch(console.error);
 }
 
 async function togglePortOnly() {
-    if (globalProxy) {
-        globalProxy = false;
-
-        await turnPortOnlyOn();
-    } else {
-        globalProxy = true;
-
-        await turnOff();
-        await turnOn();
-    }
-
+    globalProxy = !globalProxy;
+    menuItems[2].checked = !globalProxy;
     store.set('globalProxy', globalProxy);
-}
 
-async function turnPortOnlyOn() {
-    isOn = true;
-    if (proxy) {
-        await proxy.stop();
-    }
-    console.log('turnPortOnlyOn', globalProxy);
-    proxy = new Proxy({port})
-    await proxy.start();
-    win.webContents.send('changeStatus', isOn, port);
+    await turnOn();
 }
 
 async function turnOff() {
@@ -145,7 +127,8 @@ async function turnOff() {
         proxy = null
     }
 
-    win.webContents.send('changeStatus', isOn, port, true);
+    console.log('turnOff:change status', isOn, port, globalProxy)
+    win.webContents.send('changeStatus', isOn, port, globalProxy);
 
     menuItems[0].label = 'Enable';
     menuItems[0].click = () => turnOn();
@@ -158,19 +141,20 @@ async function turnOff() {
 
 async function turnOn() {
     isOn = true;
-    globalProxy = true;
 
     if (proxy) {
-        await turnOff()
+        await proxy.stop();
+        proxy = null
     }
 
     console.log('turn on proxy', port);
     proxy = new Proxy({source: 'GUI', port});
-    await proxy.start({setProxy: true});
+    await proxy.start({setProxy: globalProxy});
 
-    console.log('proxy turned on');
+    console.log('proxy turned on ', globalProxy);
 
-    win.webContents.send('changeStatus', isOn, port, true);
+    console.log('turnOn:change status', isOn, port, globalProxy)
+    win.webContents.send('changeStatus', isOn, port, globalProxy);
 
     menuItems[0].label = 'Disable';
     menuItems[0].click = () => turnOff();
@@ -215,11 +199,7 @@ function createWindow() {
     win.on('ready-to-show', async function () {
         win.show();
         win.focus();
-        if (globalProxy) {
-            await turnOn();
-        } else {
-            await turnPortOnlyOn();
-        }
+        await turnOn();
     });
 
     win.on('closed', () => {
