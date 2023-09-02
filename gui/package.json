@@ -1,15 +1,15 @@
 {
   "name": "green-tunnel-gui",
-  "version": "1.7.6",
+  "version": "1.7.7",
   "description": "bypasses DPI (Deep Packet Inspection) systems found in many ISPs (Internet Service Providers)",
   "homepage": "https://github.com/SadeghHayeri/GreenTunnel",
   "main": "main.js",
   "scripts": {
     "test": "electron .",
     "generate-icons": "electron-icon-maker --input=./icon.png --output=.",
-    "package-mac": "electron-packager . green-tunnel --overwrite --asar --platform=darwin --arch=x64 --icon=./icons/mac/icon.icns --prune=true --out=release-builds",
-    "package-win": "electron-packager . green-tunnel --overwrite --asar --platform=win32 --arch=ia32 --icon=./icons/win/icon.ico --prune=true --out=release-builds",
-    "package-linux": "electron-packager . green-tunnel --overwrite --asar --platform=linux --arch=x64 --icon=./icons/png/1024x1024.png --prune=true --out=release-builds",
+    "package-mac": "electron-packager . green-tunnel --overwrite --platform=darwin --arch=x64 --icon=./icons/mac/icon.icns --prune=true --out=release-builds",
+    "package-win": "electron-packager . green-tunnel --overwrite --platform=win32 --arch=ia32 --icon=./icons/win/icon.ico --prune=true --out=release-builds",
+    "package-linux": "electron-packager . green-tunnel --overwrite --platform=linux --arch=x64 --icon=./icons/png/1024x1024.png --prune=true --out=release-builds",
     "linux-installer": "electron-installer-debian --name green-tunnel --src release-builds/green-tunnel-linux-x64/ --arch amd64 --config installers/linux/debian.json",
     "windows-installer": "node installers/windows/createinstaller.js"
   },
