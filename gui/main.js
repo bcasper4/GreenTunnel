@@ -197,8 +197,10 @@ function createWindow() {
     win.loadFile('./view/main-page/index.html');
 
     win.on('ready-to-show', async function () {
-        win.show();
-        win.focus();
+        if (!openAtLogin){
+            win.show();
+            win.focus();
+        }
         await turnOn();
     });
 
