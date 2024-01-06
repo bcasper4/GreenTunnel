@@ -133,11 +133,10 @@ However, please make sure you follow a few rules listed below to ensure that you
 
 ## TODO List
 - [X] enable/disable proxy on windows
-- [ ] HTTPHandler
 - [X] add CLI arguments
 - [X] catch all exceptions
-- [ ] add preferences menu
-- [ ] fix close button
+- [X] add port only mode
+- [X] fix run at start
 
 ## Donation
 > Love GreenTunnel? Please consider donating to sustain our activities.
