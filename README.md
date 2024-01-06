@@ -15,6 +15,9 @@ GreenTunnel bypasses DPI (Deep Packet Inspection) systems found in many ISPs (In
 ## How to use
 ### Graphical user interface (GUI)
 You can simply choose the suitable installation for your OS in the [releases](https://github.com/SadeghHayeri/GreenTunnel/releases "releases") section.
+<p align="center">
+    <img src="assets/windows.png" alt="green tunnel demo" style="margin-top: 20px;">
+</p>
 
 ### Command-line interface (CLI)
 You can install GreenTunnel using [npm](https://www.npmjs.org/ "npm"):
