@@ -34,12 +34,12 @@ export default class Proxy {
 
 		this.server = net.createServer({ pauseOnConnect: true }, clientSocket => {
 			handleRequest(clientSocket, this).catch(err => {
-				logger.debug(String(err));
+				logger.debug('createServer error: ', String(err));
 			});
 		});
 
 		this.server.on('error', err => {
-			logger.error(err.toString());
+			logger.error('server error: ', err.toString());
 		});
 
 		this.server.on('close', () => {
@@ -56,7 +56,7 @@ export default class Proxy {
 		if (options.setProxy) {
 			await setProxy(address, port);
 			this.isSystemProxySet = true;
-			logger.debug('system proxy set');
+			logger.debug('system proxy set', address, port);
 		}
 	}
 
