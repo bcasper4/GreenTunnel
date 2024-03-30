@@ -27,14 +27,17 @@ export default async function handleHTTP(clientSocket, firstChunk, proxy) {
 	tryWrite(serverSocket, interceptRequest(firstChunk), close);
 
 	serverSocket.on('data', data => {
+		logger.debug(`[HTTP] receive from ${url.host} (length: ${data.length})`);
 		tryWrite(clientSocket, data, close);
 	});
 
 	serverSocket.on('error', error => {
+		logger.debug(`[HTTP ERROR] server error ${error}`);
 		close(error);
 	});
 
 	serverSocket.on('end', () => {
+		logger.debug(`[HTTP END] server ended ${url.host}`);
 		close();
 	});
 

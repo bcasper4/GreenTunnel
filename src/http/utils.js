@@ -41,11 +41,7 @@ export function isStartOfHTTPRequest(rawRequest) {
 
 	// Like HTTP/1.1 (For http response)
 	const httpWord = firstWord.split('/')[0];
-	if (httpWord.toLowerCase() === 'http') {
-		return true;
-	}
-
-	return false;
+	return httpWord.toLowerCase() === 'http';
 }
 
 const validMethods = [
