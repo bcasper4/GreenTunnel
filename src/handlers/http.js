@@ -13,7 +13,7 @@ export default async function handleHTTP(clientSocket, firstChunk, proxy) {
 	const host = url.hostname;
 	const port = url.port || 80;
 
-	logger.debug(`[HTTP REQUEST] ${url.host}`);
+	logger.debug(`[HTTP REQUEST] ${url.host} ${url.port}`);
 
 	// -- ServerSocket --
 

@@ -11,6 +11,7 @@ export default class DNSOverHTTPS extends BaseDNS {
 	}
 
 	async _lookup(hostname) {
+		// TODO: lookup AAAA record
 		const result = await dohQueryAsync({url: this.dnsServer}, [{type: 'A', name: hostname}]);
 		return result.answers[0].data;
 	}
